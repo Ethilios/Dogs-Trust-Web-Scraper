@@ -1,4 +1,4 @@
-import math, requests
+import math, requests, csv
 from bs4 import BeautifulSoup
 
 # URL includes the filter 'May live with... Dogs'
@@ -21,6 +21,9 @@ class Dog:
         self.name = name
         self.breed = breed
         self.location = location
+    
+    def __iter__(self):
+        return iter([self.name, self.breed, self.location])
 
 def parse_and_save(index):
     dog_name = soup.select(dog_info_link + str(index) + "> h3")[0].text.strip()
@@ -31,31 +34,46 @@ def parse_and_save(index):
     current_dog = Dog(dog_name, dog_breed, dog_location)
     all_dogs.append(current_dog)
 
-    print("Saving... " + current_dog.name)
+    #print("Saving... " + current_dog.name)
+
+def make_csv(self, allDogs):
+    # Open CSV in Write mode
+    with open("D:\Python\Dogs Trust Web Scraper\data\current-dogs.csv", 'w') as dog_data:
+        wr = csv.writer(dog_data, delimiter=",")
+        for dog in allDogs:
+            wr.writerow([dog.name, dog.breed, dog.location])
+
+'''
+    Main Function starts here
+'''
 
 print("Starting Scan...\n")
 
 if (req_status == 200):
-    print("Successfully connected to site...") 
+
+    print("Successfully connected to site...")
+
+    print("Total dogs on site: " + str(total_dogs))
+    print("Pages: " + str(num_pages))
+
+    # Loop through pages - except last page - see below
+    for i in range(1,num_pages):
+        print("\nPAGE: " + str(i))
+        current_page = requests.get(DT_base_url + str(i))
+        soup = BeautifulSoup(current_page.content, 'html.parser')
+        # Loop through elements on each page
+        for j in range(0,12):
+            parse_and_save(j)
+
+    # Handle elements on last page
+    last_page = requests.get(DT_base_url + str(num_pages))
+    soup = BeautifulSoup(last_page.content, 'html.parser')
+    dogs_on_last_page = total_dogs % 12
+    print("\nPAGE: " + str(num_pages))
+    for i in range(0, dogs_on_last_page):
+        parse_and_save(i)
+
+    make_csv(all_dogs)
+
 else:
     print("Connection to site failed.")
-     
-print("Total dogs on site: " + str(total_dogs))
-print("Pages: " + str(num_pages))
-
-# Loop through pages - except last page - see below
-for i in range(1,num_pages):
-    print("\nPAGE: " + str(i))
-    current_page = requests.get(DT_base_url + str(i))
-    soup = BeautifulSoup(current_page.content, 'html.parser')
-    # Loop through elements on each page
-    for j in range(0,12):
-        parse_and_save(j)
-
-# Handle elements on last page
-last_page = requests.get(DT_base_url + str(num_pages))
-soup = BeautifulSoup(last_page.content, 'html.parser')
-dogs_on_last_page = total_dogs % 12
-print("\nPAGE: " + str(num_pages))
-for i in range(0, dogs_on_last_page):
-    parse_and_save(i)
