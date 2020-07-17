@@ -36,7 +36,7 @@ def parse_and_save(index):
 
     #print("Saving... " + current_dog.name)
 
-def make_csv(self, allDogs):
+def make_csv(allDogs):
     # Open CSV in Write mode
     with open("D:\Python\Dogs Trust Web Scraper\data\current-dogs.csv", 'w') as dog_data:
         wr = csv.writer(dog_data, delimiter=",")
