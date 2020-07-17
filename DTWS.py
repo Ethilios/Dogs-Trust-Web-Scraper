@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 
 # URL includes the filter 'May live with... Dogs'
 DT_base_url = "https://www.dogstrust.org.uk/rehoming/dogs/filters/~~~~~n~~d/page/"
+# pylint: disable=anomalous-backslash-in-string
+CSV_data_path = "D:\Python\Dogs Trust Web Scraper\data\current-dogs.csv"
 # Create initial page object to find total dogs - vars will be overwritten in loop
 current_page = requests.get(DT_base_url + "1")
 req_status = current_page.status_code
@@ -34,11 +36,11 @@ def parse_and_save(index):
     current_dog = Dog(dog_name, dog_breed, dog_location)
     all_dogs.append(current_dog)
 
-    #print("Saving... " + current_dog.name)
+    print("Saving... " + current_dog.name)
 
 def make_csv(allDogs):
     # Open CSV in Write mode
-    with open("D:\Python\Dogs Trust Web Scraper\data\current-dogs.csv", 'w') as dog_data:
+    with open(CSV_data_path, 'w') as dog_data:
         wr = csv.writer(dog_data, delimiter=",")
         for dog in allDogs:
             wr.writerow([dog.name, dog.breed, dog.location])
@@ -73,6 +75,7 @@ if (req_status == 200):
     for i in range(0, dogs_on_last_page):
         parse_and_save(i)
 
+    print("Compiling data into CSV...")
     make_csv(all_dogs)
 
 else:
