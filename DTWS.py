@@ -79,4 +79,4 @@ if (req_status == 200):
     make_csv(all_dogs)
 
 else:
-    print("Connection to site failed.")
+    print("Connection to site failed.\nPlease check you are connected to the internet by visiting:\n\nhttps://www.dogstrust.org.uk")
