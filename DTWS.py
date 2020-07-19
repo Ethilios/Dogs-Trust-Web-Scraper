@@ -1,4 +1,4 @@
-import math, requests, csv, os
+import math, requests, csv, os, smtplib, ssl
 from bs4 import BeautifulSoup
 
 # URL includes the filter 'May live with... Dogs'
@@ -80,6 +80,9 @@ def compare_csv(old_csv_path, new_csv_path, update_csv_path):
             print("\nNew dogs added and some rehomed!\n Results saved to: " + updates_csv_path)
         else:
             print("\nNew dogs added!\nResults saved to: " + updates_csv_path)
+        
+        # Send email notification
+
     elif dogs_removed == True:
         print("\nSome dogs were rehomed!\nResults saved to: " + updates_csv_path)
     else:
@@ -93,6 +96,17 @@ def replace_csv():
         # Rename current data as previous for the next run
         os.rename(os.path.join(base_path, "current-dogs.csv"), os.path.join(base_path, "previous-dogs.csv"))
 
+def send_email(to_address):
+    # SSL port
+    port = 465
+    username = os.environ.get("DTWSEmail")
+    password = os.environ.get("DTWSPassword")
+
+    # Create secure SSL context
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login(username, password)
 
 '''
     Main Function starts here
