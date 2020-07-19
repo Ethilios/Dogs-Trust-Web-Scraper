@@ -1,10 +1,12 @@
-import math, requests, csv
+import math, requests, csv, os
 from bs4 import BeautifulSoup
 
 # URL includes the filter 'May live with... Dogs'
 DT_base_url = "https://www.dogstrust.org.uk/rehoming/dogs/filters/~~~~~n~~d/page/"
 # pylint: disable=anomalous-backslash-in-string
-CSV_data_path = "D:\Python\Dogs Trust Web Scraper\data\current-dogs.csv"
+old_CSV_data_path = "data\previous-dogs.csv"
+new_CSV_data_path = "data\current-dogs.csv"
+updates_csv_path = r"data\updates.csv"
 # Create initial page object to find total dogs - vars will be overwritten in loop
 current_page = requests.get(DT_base_url + "1")
 req_status = current_page.status_code
@@ -39,21 +41,70 @@ def parse_and_save(index):
     print("Saving... " + current_dog.name)
 
 def make_csv(allDogs):
+
+    # Check for and if needed delete old "current" file
+    if os.path.exists("data\current-dogs.csv"):
+        os.remove("data\current-dogs.csv")
+
     # Open CSV in Write mode
-    with open(CSV_data_path, 'w') as dog_data:
+    with open(new_CSV_data_path, 'w+') as dog_data:
         wr = csv.writer(dog_data, delimiter=",")
         for dog in allDogs:
             wr.writerow([dog.name, dog.breed, dog.location])
+
+def compare_csv(old_csv_path, new_csv_path, update_csv_path):
+    
+    dogs_added: bool = False
+    dogs_removed: bool = False
+
+    # Open both CSVs in read mode
+    with open(old_csv_path, 'r') as old_csv, open(new_csv_path, 'r') as new_csv:
+        old_data = old_csv.readlines()
+        new_data = new_csv.readlines()
+
+    with open(update_csv_path, 'w') as outputFile:
+        # Checking for dogs added to site
+        for line in new_data:
+            if line not in old_data:
+                outputFile.write("ADDED: " + line)
+                dogs_added = True
+        # Checking for dogs removed from site
+        for line in old_data:
+            if line not in new_data:
+                outputFile.write("REMOVED: " + line)
+                dogs_removed = True
+    
+    # A better way to do this could be with a response string var that is added to based on conditionals and then printed at the end
+    if dogs_added == True:
+        if dogs_removed == True:
+            print("\nNew dogs added and some rehomed!\n Results saved to: " + updates_csv_path)
+        else:
+            print("\nNew dogs added!\nResults saved to: " + updates_csv_path)
+    elif dogs_removed == True:
+        print("\nSome dogs were rehomed!\nResults saved to: " + updates_csv_path)
+    else:
+        print("\nNo updates! Please check again later.")
+
+def replace_csv():
+    base_path = r"D:\Python\Dogs Trust Web Scraper\data"
+    # Check for and remove old data
+    if os.path.exists(r"data\previous-dogs.csv"):
+        os.remove(r"data\previous-dogs.csv")
+        # Rename current data as previous for the next run
+        os.rename(os.path.join(base_path, "current-dogs.csv"), os.path.join(base_path, "previous-dogs.csv"))
+
 
 '''
     Main Function starts here
 '''
 
-print("Starting Scan...\n")
+print("Attempting connection to Dogs Trust site...\n")
 
 if (req_status == 200):
 
     print("Successfully connected to site...")
+
+    print("Starting Scan...\n")
 
     print("Total dogs on site: " + str(total_dogs))
     print("Pages: " + str(num_pages))
@@ -75,8 +126,16 @@ if (req_status == 200):
     for i in range(0, dogs_on_last_page):
         parse_and_save(i)
 
-    print("Compiling data into CSV...")
+    print("\nCompiling data into CSV...")
     make_csv(all_dogs)
+
+    print("Checking for updates...")
+    compare_csv(old_CSV_data_path, new_CSV_data_path, updates_csv_path)
+
+    print("\nStored data updating...")
+    replace_csv()
+
+    print("\n\t - Scan Complete! -")
 
 else:
     print("Connection to site failed.\nPlease check you are connected to the internet by visiting:\n\nhttps://www.dogstrust.org.uk")
