@@ -1,4 +1,8 @@
-import math, requests, csv, os, smtplib, ssl
+import math, requests, csv, os, smtplib, ssl, email
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from bs4 import BeautifulSoup
 
 # URL includes the filter 'May live with... Dogs'
@@ -82,6 +86,8 @@ def compare_csv(old_csv_path, new_csv_path, update_csv_path):
             print("\nNew dogs added!\nResults saved to: " + updates_csv_path)
         
         # Send email notification
+        print("\nSending email notification...")
+        send_email()
 
     elif dogs_removed == True:
         print("\nSome dogs were rehomed!\nResults saved to: " + updates_csv_path)
@@ -96,17 +102,59 @@ def replace_csv():
         # Rename current data as previous for the next run
         os.rename(os.path.join(base_path, "current-dogs.csv"), os.path.join(base_path, "previous-dogs.csv"))
 
-def send_email(to_address):
-    # SSL port
-    port = 465
-    username = os.environ.get("DTWSEmail")
+def send_email():    
+    # Email setup
+    subject = "DTWS Update!"
+    body = "Here's your update..."
+    # Access credentials from environment variables to avoid hard-coding them
+    # Tutorial on how to achieve this can be found here:
+    # https://saralgyaan.com/posts/set-passwords-and-secret-keys-in-environment-variables-maclinuxwindows-python-quicktip/
+    sender_email = os.environ.get("DTWSEmail")
+    receiver_email = os.environ.get("GEmail")
+    cc_email = os.environ.get("KEmail")
     password = os.environ.get("DTWSPassword")
+    port = 465
+    smtp_server = "smtp.gmail.com"
+
+    # Create a multipart message and set headers
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Cc"] = cc_email
+    message["Subject"] = subject
+
+    # Add body to email
+    message.attach(MIMEText(body, "plain"))
+
+    filename = r"data\updates.csv"
+    
+    # Open CSV in binary mode
+    with open(filename, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    # Encode file in ASCII characters to send by email    
+    encoders.encode_base64(part)
+
+    # Add header as key/value pair to attachment part
+    part.add_header(
+        "Content-Disposition",
+        f"attachment; filename= {filename}",
+    )
+
+    # Add attachment to message and convert message to string
+    message.attach(part)
+    text = message.as_string()
 
     # Create secure SSL context
     context = ssl.create_default_context()
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
-        server.login(username, password)
+    # Send the email
+    with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, text)
 
 '''
     Main Function starts here
