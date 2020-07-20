@@ -86,7 +86,6 @@ def compare_csv(old_csv_path, new_csv_path, update_csv_path):
             print("\nNew dogs added!\nResults saved to: " + updates_csv_path)
         
         # Send email notification
-        print("\nSending email notification...")
         send_email("DTWS - Dogs Added!", "Here's your update...")
 
     elif dogs_removed == True:
