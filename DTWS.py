@@ -87,10 +87,12 @@ def compare_csv(old_csv_path, new_csv_path, update_csv_path):
         
         # Send email notification
         print("\nSending email notification...")
-        send_email("DTWS - New Updates!", "Here's your update...")
+        send_email("DTWS - Dogs Added!", "Here's your update...")
 
     elif dogs_removed == True:
         print("\nSome dogs were rehomed!\nResults saved to: " + updates_csv_path)
+        send_email("DTWS - Dogs Rehomed!", "Here's your update...")
+        
     else:
         print("\nNo updates! Please check again later.")
         send_email("DTWS - No Updates", "Nothing to report.")
@@ -104,6 +106,9 @@ def replace_csv():
         os.rename(os.path.join(base_path, "current-dogs.csv"), os.path.join(base_path, "previous-dogs.csv"))
 
 def send_email(subject_line, body_text):    
+    
+    print("Sending email notification...")
+
     # Email setup
     subject = subject_line
     body = body_text
