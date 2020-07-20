@@ -108,9 +108,13 @@ def send_email(subject_line, body_text):
     
     print("Sending email notification...")
 
+    with open(updates_csv_path, 'r') as updates:
+        update_data = updates.readlines()
+
     # Email setup
     subject = subject_line
-    body = body_text
+    # Added updates into body of email in case client doesn't recognise CSV attachment
+    body = body_text + "\n\n" + '\n'.join(update_data)
     # Access credentials from environment variables to avoid hard-coding them
     # Tutorial on how to achieve this can be found here:
     # https://saralgyaan.com/posts/set-passwords-and-secret-keys-in-environment-variables-maclinuxwindows-python-quicktip/
@@ -131,7 +135,7 @@ def send_email(subject_line, body_text):
     # Add body to email
     message.attach(MIMEText(body, "plain"))
 
-    filename = r"data\updates.csv"
+    filename = updates_csv_path
     
     # Open CSV in binary mode
     with open(filename, "rb") as attachment:
