@@ -87,12 +87,13 @@ def compare_csv(old_csv_path, new_csv_path, update_csv_path):
         
         # Send email notification
         print("\nSending email notification...")
-        send_email()
+        send_email("DTWS - New Updates!", "Here's your update...")
 
     elif dogs_removed == True:
         print("\nSome dogs were rehomed!\nResults saved to: " + updates_csv_path)
     else:
         print("\nNo updates! Please check again later.")
+        send_email("DTWS - No Updates", "Nothing to report.")
 
 def replace_csv():
     base_path = r"D:\Python\Dogs Trust Web Scraper\data"
@@ -102,10 +103,10 @@ def replace_csv():
         # Rename current data as previous for the next run
         os.rename(os.path.join(base_path, "current-dogs.csv"), os.path.join(base_path, "previous-dogs.csv"))
 
-def send_email():    
+def send_email(subject_line, body_text):    
     # Email setup
-    subject = "DTWS Update!"
-    body = "Here's your update..."
+    subject = subject_line
+    body = body_text
     # Access credentials from environment variables to avoid hard-coding them
     # Tutorial on how to achieve this can be found here:
     # https://saralgyaan.com/posts/set-passwords-and-secret-keys-in-environment-variables-maclinuxwindows-python-quicktip/
