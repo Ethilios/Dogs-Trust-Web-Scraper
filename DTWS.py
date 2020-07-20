@@ -1,9 +1,14 @@
+###         IMPORTS         ###
+
 import math, requests, csv, os, smtplib, ssl, email
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from bs4 import BeautifulSoup
+
+
+###         VARIABLES       ###
 
 # URL includes the filter 'May live with... Dogs'
 DT_base_url = "https://www.dogstrust.org.uk/rehoming/dogs/filters/~~~~~n~~d/page/"
@@ -22,7 +27,8 @@ dog_info_link = "#BodyContent_DogList1_rptDogList_lnkDog_"
 # Initialise list to hold all dogs' info
 all_dogs = []
 
-####################
+
+###       CLASSES & FUNCTIONS      ###
 
 class Dog:
     def __init__(self, name, breed, location):
@@ -165,9 +171,8 @@ def send_email(subject_line, body_text):
         server.login(sender_email, password)
         server.sendmail(sender_email, receiver_email, text)
 
-'''
-    Main Function starts here
-'''
+
+###         MAIN        ###
 
 print("Attempting connection to Dogs Trust site...\n")
 
