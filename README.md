@@ -12,7 +12,8 @@ If it detects changes you can configure it to send you an email notification whi
 
 ## Setup - Email Notifications
 ### Create an Account
-The first step is to setup a new gmail account. This is just to keep it separate from your normal account and adds a buffer in the event that the credentials for the account are exposed.
+The first step is to setup a new gmail account. This is just to keep it separate from your normal account and adds a buffer in the event that the credentials for the account are exposed.  
+To allow the script to send emails you will need to allow less secure apps on your account by going [here](https://myaccount.google.com/lesssecureapps).
 ### Leveraging Environment Variables
 To avoid exposing credentials in the code you can setup environment variables on your local machine to hold your email address and password.  
 A detailed explanation of how to do this can be found [here](https://saralgyaan.com/posts/set-passwords-and-secret-keys-in-environment-variables-maclinuxwindows-python-quicktip/).
