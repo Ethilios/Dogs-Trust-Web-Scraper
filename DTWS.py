@@ -66,7 +66,7 @@ def make_csv(allDogs):
     with open(new_CSV_data_path, 'w+') as dog_data:
         wr = csv.writer(dog_data, delimiter=",")
         for dog in allDogs:
-            wr.writerow([dog.name, dog.breed, dog.location])
+            wr.writerow([dog.name, dog.breed, dog.location, dog.link])
 
 def compare_csv(old_csv_path, new_csv_path, update_csv_path):
     
